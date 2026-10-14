@@ -12,6 +12,21 @@ export function focusWorkspaceListToggle(): void {
 }
 
 /**
+ * A phone's drawer has just closed (toggle, Escape, scrim, swipe, a lens switch). While it was open
+ * the pane behind it was inert, so the focus is in the drawer that is about to hide, or nowhere:
+ * the toggle that opened it takes it back. A pane picked in the drawer, a dialog or a control the
+ * user moved to meanwhile keeps the focus it was given: only "nowhere" is answered, and a
+ * touch screen's keyboard is never raised by it, since the toggle is a button.
+ */
+export function returnFocusFromDrawer(): void {
+  window.requestAnimationFrame(() => {
+    const active = document.activeElement;
+    const nowhere = active === null || active === document.body || (document.getElementById("workspace-drawer")?.contains(active) ?? false);
+    if (nowhere && !modalOpen()) focusWorkspaceListToggle();
+  });
+}
+
+/**
  * Whether a modal surface is up (Settings, a dialog). A pane that appears under one, as a link
  * that opens Settings mounts it beneath the dialog (lib/deepLink.ts), must not take the focus out
  * of the modal: its composer and its grid leave the keyboard where it is.

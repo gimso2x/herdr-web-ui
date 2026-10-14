@@ -2099,9 +2099,28 @@ try {
   await mobilePage.locator('button[aria-controls="workspace-drawer"]').click();
   await mobilePage.locator("#workspace-drawer.is-open").waitFor();
   await mobilePage.getByRole("textbox", { name: "Message", exact: true }).focus();
+  assert.equal(await typing(mobilePage), false, "an open drawer makes the pane behind it inert");
+  await mobilePage.locator('button[aria-controls="workspace-drawer"]').focus();
+  for (let step = 0; step < 12; step++) {
+    await mobilePage.keyboard.press("Tab");
+    assert.equal(await mobilePage.evaluate(() => Boolean(document.activeElement?.closest(".pane-column, .view-switch, .palette-button, .header-more-button"))), false, "drawer Tab never reaches covered pane or header controls");
+  }
   await mobilePage.keyboard.press("Escape");
   await mobilePage.locator("#workspace-drawer.is-open").waitFor({ state: "detached" });
   assert.equal(await mobilePage.evaluate(() => (window as unknown as { escapes: number }).escapes), 0, "Escape that closes the drawer does not reach the page");
+  await mobilePage.waitForFunction(() => document.activeElement?.matches(".drawer-toggle"));
+  for (const closeWith of ["toggle", "scrim"] as const) {
+    await mobilePage.locator('button[aria-controls="workspace-drawer"]').click();
+    await mobilePage.locator("#workspace-drawer.is-open").waitFor();
+    await mobilePage.locator("#workspace-drawer button").first().focus();
+    await mobilePage.locator(closeWith === "toggle" ? ".drawer-toggle" : ".scrim").click(closeWith === "scrim" ? { position: { x: 380, y: 100 } } : {});
+    await mobilePage.locator("#workspace-drawer.is-open").waitFor({ state: "detached" });
+    await mobilePage.waitForFunction(() => document.activeElement?.matches(".drawer-toggle"));
+  }
+  const headerTargets = await mobilePage.locator(".app-header .icon-button").evaluateAll((buttons) => buttons.filter((button) => button.getClientRects().length > 0).map((button) => { const rect = button.getBoundingClientRect(); return { width: rect.width, height: rect.height }; }));
+  assert.ok(headerTargets.length > 0);
+  for (const target of headerTargets) assert.ok(target.width >= 44 && target.height >= 44, "phone header buttons have 44px touch targets");
+  assert.equal(await mobilePage.locator(".view-switch > button").evaluateAll((buttons) => buttons.every((button) => { const rect = button.getBoundingClientRect(); return rect.width >= 44 && document.elementFromPoint(rect.x + rect.width / 2, rect.y - 4)?.closest("button") === button; })), true, "lens controls extend their hit area without enlarging the track");
   console.log("PASS Escape closes a phone's drawer and goes no further");
 
   // Claude's suggestion on a phone is the placeholder and a chip that fills the box, until Settings turns the chip off

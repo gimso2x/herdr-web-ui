@@ -464,6 +464,7 @@ Observe connections cannot take a pane, and a displaced bridge never takes it ba
 | `HERDR_WEB_HERDR_BIN` | `herdr` | herdr executable used for terminal attach |
 | `HERDR_WEB_APP_NAME` | unset (`herdr`) | The name the installed app has on a phone or computer, for example the PC's name. Each PC installs as an app of its own, and without it they are all called `herdr`. An app already installed takes the new name when the browser next updates it, usually within a day or two, without a reinstall. Keep it short: a home screen cuts a long label |
 | `HERDR_WEB_PASTE_DIR` | `<pane cwd>/.herdr-web-ui` | Where pasted and attached files are saved: an absolute path or `~/…`. Set it to keep them out of your projects; an agent may then ask before reading one. It covers the panes of this server's PC; a remote PC keeps the default |
+| `HERDR_WEB_BOARD_PATH` | unset | A same-origin path such as `/task/`, for a page you serve beside this app (behind the same reverse proxy). The More menu then offers **Task board**, which opens it in the same tab. The app proxies and embeds nothing; a full URL or `//host` is ignored |
 | `CODEX_HOME` | `~/.codex` | Where Codex sessions are read |
 
 ## Updates

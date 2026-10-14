@@ -148,6 +148,7 @@
   --sidebar-w: 320px;
   --control-h: 34px;
   --touch-target: 40px;
+  --touch-target-header: 44px;
   --keybar-h: 48px;
   --row-h: 56px;
   --chip-h: 20px;
@@ -1101,6 +1102,29 @@ button {
   .btn,
   .error-retry {
     height: var(--touch-target);
+  }
+}
+
+/* a phone's header: 44px targets, the size iOS and Android ask for. The icon buttons grow (the header
+   is 46px at the least); the lens switch keeps its look and reaches 44px with an invisible
+   extension above and below its buttons and a 44px minimum width. Desktop and tablets keep
+   their sizes. */
+@media (max-width: 768px) and (pointer: coarse) {
+  .app-header .icon-button {
+    width: var(--touch-target-header);
+    height: var(--touch-target-header);
+  }
+
+  .view-switch > button {
+    position: relative;
+    justify-content: center;
+    min-width: var(--touch-target-header);
+  }
+
+  .view-switch > button::after {
+    content: "";
+    position: absolute;
+    inset: calc((100% - var(--touch-target-header)) / 2) 0;
   }
 }
 

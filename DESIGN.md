@@ -324,6 +324,7 @@ Comfortable values are `:root`; the final column is the complete compact overrid
 | `--sidebar-w` | `320px` | `300px` | Sidebar/drawer; the default while the user has not dragged the sidebar's edge |
 | `--control-h` | `34px` | `32px` | Buttons and fields |
 | `--touch-target` | `40px` | — | Coarse-pointer minimum |
+| `--touch-target-header` | `44px` | — | A phone header's icon buttons and lens switch (`<=768px`, coarse pointer) |
 | `--keybar-h` | `48px` | — | Terminal key bar |
 | `--row-h` | `56px` | `44px` | Palette, worktree, device and background-task list rows; chat and composer list height caps |
 | `--chip-h` | `20px` | `18px` | Badge/pill height |
@@ -427,6 +428,9 @@ One set for both themes: the card is island black wherever it shows.
 - `.icon-button` is a square unlabeled visual control with mandatory `aria-label`; `.is-outlined`
   adds the border. Both families use `--control-h`, `--radius-md`, focus ring, hover and disabled.
 - Coarse pointers grow controls to `--touch-target`.
+- On a phone (`<=768px`, coarse pointer) every header icon button is `--touch-target-header`; the
+  Chat/Terminal switch keeps its look and reaches the same 44px through an invisible extension
+  above and below its buttons and a 44px minimum width. Desktop and tablet headers are unchanged.
 
 ### Segmented control (`.segmented`)
 - One `aria-pressed="true"` option receives hover fill and strong text; the group itself is an
@@ -822,6 +826,9 @@ One set for both themes: the card is island black wherever it shows.
   `aria-checked` in the popover and a button with `aria-pressed` in the sheet. While alerts are off on this device the
   More button carries a `--dot-size` `--accent` dot and its name says "alerts are off": the dot
   marks the state that needs a look, never "on".
+- With the server's `HERDR_WEB_BOARD_PATH` set to a same-origin path (`/task/`), the More menu also
+  lists **Task board** after Copy link. It navigates this tab there: no proxy, no frame, and a
+  full URL or `//host` value is ignored. Unset, the item does not exist.
 - The segmented Chat/Terminal view switch lives in the header. There is no floating view-toggle pill.
 - Connection is one quiet chip, drawn only while the bridge is not live: a pulsing dot plus the
   written reconnecting/disconnected state. Below `900px` it keeps only its dot; the word stays as
@@ -1420,6 +1427,12 @@ One set for both themes: the card is island black wherever it shows.
   terminal key and register exact combinations. Removing a held modifier clears it immediately.
   A deliberately empty row retains only the keyboard mode control on a touch screen.
 - The mobile drawer slides over a scrim. Closed visibility removes its controls from the tab order.
+  While it is open the pane column is `inert` (no Tab stop, no screen-reader reach, the pane's
+  focus is dropped) and the header's palette, lens and More buttons are skipped by Tab, so the
+  keyboard stays between the toggle and the drawer; a tap on the header's lens buttons still works
+  and closes the drawer. When the drawer closes (toggle, Escape, scrim, swipe, lens switch,
+  `>=769px`), focus returns to the workspace-list toggle only if it was left inside the drawer or
+  nowhere; a pane picked, a dialog or a control the user moved to keeps it, and no keyboard rises.
 
 ### In-app alert
 - While the app is on screen, a pane that needs input, finishes a turn (by the device's Finished
@@ -1541,6 +1554,6 @@ The values are the ones in `src/styles.css`.
 | Item | Location | Why accepted | Exit |
 |------|----------|--------------|------|
 | Terminal content accessibility relies on xterm defaults | `PaneTerminal.tsx` | Screen-reader mode changes terminal DOM and input behavior | Decide with herdr TUI owners |
-| Drawer has no focus trap | `.sidebar.is-open` | Closed state leaves the tab order, but open-state trapping is not implemented | Add a shared focus utility |
+| Open drawer does not wrap Tab | `.sidebar.is-open`, `App.tsx` | The pane behind is `inert` and the header's other tab stops are skipped, so Tab cannot reach the background; at the drawer's last control it leaves the page for the browser's own chrome instead of wrapping | Add a wrapping trap to `useFocusTrap` that skips `inert` stops |
 | Modal focus is initialized, not fully trapped | Dialog components | Escape/scrim/close work; tab containment is not shared | Add the same focus utility |
 | Terminal colors exist in CSS and JavaScript | `styles.css`, `settings.ts` | xterm consumes a JS theme | Keep `terminalTheme()` verbatim with `--term-*` |

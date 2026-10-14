@@ -177,6 +177,7 @@ export const JA: Record<string, string> = {
   "herdr offline": "herdr オフライン",
   "Browse files": "ファイルを参照",
   "Copy link": "リンクをコピー",
+  "Task board": "タスクボード",
   "Link copied": "リンクをコピーしました",
   "That agent has closed: its workspace is open": "そのエージェントは閉じられました。代わりにワークスペースを開きました",
   "That link's workspace is closed": "そのリンクのワークスペースは閉じられています",

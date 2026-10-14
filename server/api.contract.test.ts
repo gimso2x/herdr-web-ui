@@ -3179,6 +3179,28 @@ describe("token auth", () => {
     expect(securedBody.lan_exposure).toBeUndefined();
   });
 
+  it("offers the board link only when HERDR_WEB_BOARD_PATH names a same-origin path, and only to a client that got in", async () => {
+    type HealthBody = { board_path?: string };
+    const before = process.env["HERDR_WEB_BOARD_PATH"];
+    const stateDir = mkdtempSync(join(tmpdir(), "herdr-board-"));
+    const instance = createServer({ port: 0, hostname: "127.0.0.1", token: "", stateDir });
+    const health = async (base: string): Promise<HealthBody> => (await (await fetch(`${base}/api/health`)).json()) as HealthBody;
+    try {
+      delete process.env["HERDR_WEB_BOARD_PATH"];
+      expect((await health(`http://127.0.0.1:${instance.port}`)).board_path).toBeUndefined();
+      process.env["HERDR_WEB_BOARD_PATH"] = "/task/";
+      expect((await health(`http://127.0.0.1:${instance.port}`)).board_path).toBe("/task/");
+      // a gate that stays closed tells nothing, and a value that leaves the origin is dropped
+      expect((await health(securedBase())).board_path).toBeUndefined();
+      process.env["HERDR_WEB_BOARD_PATH"] = "https://example.com/task/";
+      expect((await health(`http://127.0.0.1:${instance.port}`)).board_path).toBeUndefined();
+    } finally {
+      if (before === undefined) delete process.env["HERDR_WEB_BOARD_PATH"]; else process.env["HERDR_WEB_BOARD_PATH"] = before;
+      instance.stop();
+      rmSync(stateDir, { recursive: true, force: true });
+    }
+  });
+
   it("refuses a token that does not match", async () => {
     const res = await fetch(`${securedBase()}/api/auth`, {
       method: "POST",

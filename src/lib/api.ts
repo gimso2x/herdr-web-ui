@@ -323,6 +323,8 @@ export interface HealthInfo {
   auth?: HealthAuth;
   /** present only while this server is reachable beyond this PC with no token and nothing paired */
   lan_exposure?: LanExposure;
+  /** HERDR_WEB_BOARD_PATH: a same-origin path the More menu links to; absent unless the operator set it */
+  board_path?: string;
 }
 
 export async function fetchHealth(): Promise<HealthInfo> {
